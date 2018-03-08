@@ -11,35 +11,28 @@ namespace ConsoleApp1
 
         public Statistics()
         {
-            Metrics["elapsed"] = 0;
-            Metrics["producedCount"] = 0;
-            Metrics["producedAvg"] = 0;
-            Metrics["consumedCount"] = 0;
-            Metrics["consumedAvg"] = 0;
+            Metrics["elapsed-seconds"] = 0;
+            Metrics["produced-count"] = 0;
+            Metrics["produced-average"] = 0;
+            Metrics["consumed-count"] = 0;
+            Metrics["consumed-average"] = 0;
         }
 
-        public async Task UpdateAsync()
+        public void Start()
         {
-
             Task metricTask = UpdateMetricsAsync();
             Task consoleTask = UpdateConsoleAsync();
         }
+
         private async Task UpdateMetricsAsync()
         {
             while (true)
             {
                 lock (Metrics)
                 {
-                    var weightedProduction = Metrics["producedAvg"] * Metrics["elapsed"];
-                    var weightedConsumed = Metrics["consumedAvg"] * Metrics["elapsed"];
-
-                    Metrics["elapsed"] += 1;
-
-                    Metrics["producedAvg"] = (weightedProduction + Metrics["producedCount"]) / Metrics["elapsed"];
-                    Metrics["consumedAvg"] = (weightedConsumed + Metrics["consumedCount"]) / Metrics["elapsed"];
-
-                    Metrics["producedCount"] = 0;
-                    Metrics["consumedCount"] = 0;
+                    Metrics["elapsed-seconds"] += 1;
+                    Metrics["produced-average"] = Metrics["produced-count"] / Metrics["elapsed-seconds"];
+                    Metrics["consumed-average"] = Metrics["consumed-count"] / Metrics["elapsed-seconds"];
                 }
 
                 await Task.Delay(1000);
@@ -55,13 +48,15 @@ namespace ConsoleApp1
 
                 lock (Console.Out)
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-
                     foreach (string key in keys)
                     {
+                        if (key == "produced-average" || key == "consumed-average")
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                        }
                         Console.WriteLine($"{key} = {Metrics[key]}");
+                        Console.ResetColor();
                     }
-                    Console.ResetColor();
                     Console.SetCursorPosition(0, Console.CursorTop - keys.Count);
                 }
 
