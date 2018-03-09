@@ -27,22 +27,23 @@ namespace AzureServiceBusBenchmark
 
             for (int j = 0; j < consumerClientCount; j++)
             {
-                InitializeReceiver(new SubscriptionClient(connectionString, topic, subscription), j);
+                InitializeReceiver(connectionString, topic, subscription, j);
             }
 
             for (int i = 0; i < producerClientCount; i++)
             {
-                Task sendLoop = SendMessagesAsync(new TopicClient(connectionString, topic), i, messages, ttl);
+                Task sendLoop = SendMessagesAsync(connectionString, topic, i, messages, ttl);
             }
 
             new Statistics().Start();
         }
 
-        private async Task SendMessagesAsync(TopicClient client, int index, int messages, int ttl)
+        private async Task SendMessagesAsync(string connectionString, string topic, int index, int messages, int ttl)
         {
             string key = $"producer-{index}-send-count";
             Statistics.Metrics[key] = 0;
             Random generate = new Random();
+            TopicClient client = new TopicClient(connectionString, topic);
 
             while (messages > 0)
             {
@@ -67,19 +68,18 @@ namespace AzureServiceBusBenchmark
             }
         }
 
-        private void InitializeReceiver(SubscriptionClient client, int index)
+        private void InitializeReceiver(string connectionString, string topic, string subscription, int index)
         {
             string key = $"consumer-{index}-recieved-count";
             Statistics.Metrics[key] = 0;
+
+            SubscriptionClient client = new SubscriptionClient(connectionString, topic, subscription);
 
             MessageHandlerOptions options = new MessageHandlerOptions(args =>
             {
                 Console.WriteLine(args.Exception.Message);
                 return Task.CompletedTask;
-            })
-            {
-                MaxConcurrentCalls = 10
-            };
+            });
 
             client.RegisterMessageHandler((message, cancellationToken) =>
             {
