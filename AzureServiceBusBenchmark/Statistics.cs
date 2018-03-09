@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ConsoleApp1
+namespace AzureServiceBusBenchmark
 {
     public class Statistics
     {

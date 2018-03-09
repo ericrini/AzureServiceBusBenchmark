@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ConsoleApp1
+namespace AzureServiceBusBenchmark
 {
     public class Program
     {
@@ -32,7 +32,7 @@ namespace ConsoleApp1
 
             for (int i = 0; i < producerClientCount; i++)
             {
-                Task sendLoop = SendMessagesAsync(new TopicClient(connectionString, topic), i, messages, int ttl);
+                Task sendLoop = SendMessagesAsync(new TopicClient(connectionString, topic), i, messages, ttl);
             }
 
             new Statistics().Start();
