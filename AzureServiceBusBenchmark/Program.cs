@@ -25,7 +25,7 @@ namespace AzureServiceBusBenchmark
             var topic = "performance-benchmark";
             var subscription = "subscription-1";
 
-            for (int j = 0; j < producerClientCount; j++)
+            for (int j = 0; j < consumerClientCount; j++)
             {
                 InitializeReceiver(new SubscriptionClient(connectionString, topic, subscription), j);
             }
@@ -76,7 +76,10 @@ namespace AzureServiceBusBenchmark
             {
                 Console.WriteLine(args.Exception.Message);
                 return Task.CompletedTask;
-            });
+            })
+            {
+                MaxConcurrentCalls = 10
+            };
 
             client.RegisterMessageHandler((message, cancellationToken) =>
             {
